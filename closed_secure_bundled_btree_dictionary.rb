@@ -2,9 +2,9 @@
 # bundled
 # stateful
 module Dictionary
+  # Clase Node usada por Dict
   class Node
     attr_reader :key, :value, :left, :right
-    include Enumerable
     def initialize(key, value)
       @key, @value = key, value
     end
@@ -54,10 +54,21 @@ module Dictionary
       return claves
     end
     def values
-      entries.map {|e| e.value}
+      values = []
+      if @value != nil
+        values.push(@value)
+      end
+      if @left != nil
+        values.push(@left.values)
+      end
+      if @right != nil
+        values.push(@right.values)
+      end
+      return values
     end
     def insert_into(destination, another_one)
       var = destination.to_s
+      # Para no duplicar codigo para left y right
       eval(%Q{
         if @#{var}.nil?
           @#{var} = another_one
@@ -101,31 +112,19 @@ module Dictionary
     def keys()
       claves = []
       if @root.key != nil
-        claves.push(@root.key)
+        claves.push(@root.keys)
       end
-      if @root.left != nil
-        claves.push(@root.left.keys)
-      end
-      if @root.right != nil
-        claves.push(@root.right.keys)
-      end
-      return claves
+      return claves.flatten.sort
     end
     def values()
-      values = Array.new()
-      if @root.value != nil
-        values.push(@root.value)
+      values = []
+      if @root.key != nil
+        values.push(@root.values)
       end
-      if @root.left != nil
-        values.push(Array(@root.left.values))
-      end
-      if @root.right != nil
-        values.push(Array(@root.right.values))
-      end
-      return values
+      return values.flatten.sort
     end
     def equals(dict)
-      return @root == dict
+      return keys() == dict.keys && values() == dict.values
     end
   end
   # Pruebas
@@ -140,5 +139,7 @@ module Dictionary
   puts dict1.get("a") # 1
   puts dict1.get("c") # 3
   puts dict1.get("b") # 2
-  puts dict1.equals(dict2)
+  puts dict1.equals(dict2) # true
+  dict1.put("a", 5)
+  puts dict1.equals(dict2) # false
 end
